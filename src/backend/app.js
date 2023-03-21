@@ -124,7 +124,7 @@ app.get('/all-meals', (req, res) => {
     })
 })
 
-app.get('/last-meal', (req, res) => {
+app.get('/first-meal', (req, res) => {
   knex
     .raw('SELECT FIRST(`id`) FROM Meal')
     .then((rows) => {
