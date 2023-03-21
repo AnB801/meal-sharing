@@ -24,6 +24,8 @@ router.use('/meals', mealsRouter)
 
 //--Homework week1--
 
+//I like this solution, but Ahmed recommended another one
+
 app.get('/:requeSt', async (req, res) => {
   const { requeSt } = req.params
   const knex = require('./database')
@@ -31,13 +33,13 @@ app.get('/:requeSt', async (req, res) => {
   let basePath = ''
 
   switch (requeSt) {
-    case '/all': {
+    case 'all': {
       basePath = await knex.select('*').from('Meal')
       res.json(basePath)
       break
     }
 
-    case '/future-meals': {
+    case 'future-meals': {
       basePath = await knex
         .select('*')
         .from('Meal')
@@ -46,7 +48,7 @@ app.get('/:requeSt', async (req, res) => {
       break
     }
 
-    case '/past-meals': {
+    case 'past-meals': {
       basePath = await knex
         .select('*')
         .from('Meal')
@@ -55,19 +57,19 @@ app.get('/:requeSt', async (req, res) => {
       break
     }
 
-    case '/all-meals': {
+    case 'all-meals': {
       basePath = await knex.select('*').from('Meal').orderBy('id')
       res.json(basePath)
       break
     }
 
-    case '/first-meal': {
+    case 'first-meal': {
       basePath = await knex.select('*').from('Meal').where('id', 1)
       res.json(basePath)
       break
     }
 
-    case '/last-meal': {
+    case 'last-meal': {
       basePath = await knex
         .select('*')
         .from('Meal')
@@ -84,40 +86,69 @@ app.get('/:requeSt', async (req, res) => {
   }
 })
 
-// const knex = require('./database')
+// like Ahmed say ))
 
-// app.get('/requeSt', async (req, res) => {
-//   const { requeSt } = req.params
-//   switch (requeSt) {
-//     case '/past-meals':
-//       knex
-//         // .whereWrapped('SETECT * FROM Meal WHERE ')
-//         .SETECT('*')
-//         .FROM('Meal')
-//         .where('when_created', '=', '01-01-2023')
-//         .then((results) => {
-//           res.status(200).json(results)
-//         })
-//         .catch((err) => {
-//           console.error(err)
-//           res.status(500).json({ error: 'Internal server error' })
-//         })
-//       break
-//   }
-// })
+app.get('/future-meals', (req, res) => {
+  knex
+    .raw("SELECT * FROM Meal WHERE 'when_created'<'01-01-2023'")
+    .then((rows) => {
+      const jsonResponce = JSON.stringify(rows)
+      res.send(jsonResponce)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
 
-// app.get('/first-meal', (req, res) => {
-//   knex
-//     .raw('SETECT * FROM Meal WHERE id = (SETECT MIN(id) FROM Meal)')
-//     .then((rows) => {
-//       const jsonResponce = JSON.stringify(rows)
-//       res.send(jsonResponce)
-//     })
-//     .catch((error) => {
-//       console.error(error)
-//       res.status(500).end('Internal Server Error')
-//     })
-// })
+app.get('/past-meals', (req, res) => {
+  knex
+    .raw("SELECT * FROM Meal WHERE 'when_created'>'01-01-2023'")
+    .then((rows) => {
+      const jsonResponce = JSON.stringify(rows)
+      res.send(jsonResponce)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
+
+app.get('/all-meals', (req, res) => {
+  knex
+    .raw('SELECT * FROM Meal ORDER BY id')
+    .then((rows) => {
+      const jsonResponce = JSON.stringify(rows)
+      res.send(jsonResponce)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
+
+app.get('/last-meal', (req, res) => {
+  knex
+    .raw('SELECT FIRST(`id`) FROM Meal')
+    .then((rows) => {
+      const jsonResponce = JSON.stringify(rows)
+      res.send(jsonResponce)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
+
+app.get('/last-meal', (req, res) => {
+  knex
+    .raw('SELECT MAX(`id`) FROM Meal')
+    .then((rows) => {
+      const jsonResponce = JSON.stringify(rows)
+      res.send(jsonResponce)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
+
+//-- end
 
 if (process.env.API_PATH) {
   app.use(process.env.API_PATH, router)
