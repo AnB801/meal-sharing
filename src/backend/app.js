@@ -2,8 +2,9 @@ const express = require('express')
 const app = express()
 const router = express.Router()
 const path = require('path')
-
 const mealsRouter = require('./api/meals')
+const reservationsRouter = require('./api/reservations')
+
 const buildPath = path.join(__dirname, '../../dist')
 const port = process.env.PORT || 3000
 const cors = require('cors')
@@ -20,73 +21,26 @@ app.use(express.json())
 app.use(cors())
 
 //localhost:5000/api/meals
-router.use('/meals', mealsRouter)
+router.use('/Meal', mealsRouter)
+router.use('/Reservations', reservationsRouter)
+router.use('/Reviews', reviewsRouter)
 
 //--Homework week1--
 
-//I like this solution, but Ahmed recommended another one
-
-app.get('/:requeSt', async (req, res) => {
-  const { requeSt } = req.params
-  const knex = require('./database')
-
-  let basePath = ''
-
-  switch (requeSt) {
-    case 'all': {
-      basePath = await knex.select('*').from('Meal')
-      res.json(basePath)
-      break
-    }
-
-    case 'future-meals': {
-      basePath = await knex
-        .select('*')
-        .from('Meal')
-        .where('when_created', '<', '01-01-2023')
-      res.json(basePath)
-      break
-    }
-
-    case 'past-meals': {
-      basePath = await knex
-        .select('*')
-        .from('Meal')
-        .where('when_created', '>', '01-01-2023')
-      res.json(basePath)
-      break
-    }
-
-    case 'all-meals': {
-      basePath = await knex.select('*').from('Meal').orderBy('id')
-      res.json(basePath)
-      break
-    }
-
-    case 'first-meal': {
-      basePath = await knex.select('*').from('Meal').where('id', 1)
-      res.json(basePath)
-      break
-    }
-
-    case 'last-meal': {
-      basePath = await knex
-        .select('*')
-        .from('Meal')
-        .orderBy('id', 'desc')
-        .first()
-      res.json(basePath)
-      break
-    }
-
-    default:
-      console.log(requeSt)
-      res.status(404).json({ error: 'there is no such thing ' })
-      break
-  }
-})
-
 // like Ahmed say ))
+const knex = require('./database')
+
+app.get('/all-meals', (req, res) => {
+  knex
+    .raw('SELECT * FROM Meal ORDER BY id')
+    .then((rows) => {
+      const jsonResponce = JSON.stringify(rows)
+      res.send(jsonResponce)
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
 
 app.get('/future-meals', (req, res) => {
   knex
@@ -103,18 +57,6 @@ app.get('/future-meals', (req, res) => {
 app.get('/past-meals', (req, res) => {
   knex
     .raw("SELECT * FROM Meal WHERE 'when_created'>'01-01-2023'")
-    .then((rows) => {
-      const jsonResponce = JSON.stringify(rows)
-      res.send(jsonResponce)
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-})
-
-app.get('/all-meals', (req, res) => {
-  knex
-    .raw('SELECT * FROM Meal ORDER BY id')
     .then((rows) => {
       const jsonResponce = JSON.stringify(rows)
       res.send(jsonResponce)
@@ -150,6 +92,68 @@ app.get('/last-meal', (req, res) => {
 
 //-- end
 
+//--Homework week2--
+// app.use('/api/meals', mealsRouter)
+// app.use('/api/reservations', reservationsRouter)
+
+//app.use(express.json())
+
+// app.get('/', (req, res) => {
+//   res.send('This is a search engine')
+// })
+
+// app.get('/search', (req, res) => {
+//   const q = req.query.q
+//   const documents = JSON.parse(fs.readFileSync('documents.json'))
+//   const filteredDocuments = q
+//     ? documents.filter((doc) =>
+//         Object.values(doc).some((value) => value.toString().includes(q))
+//       )
+//     : documents
+
+//   res.json(filteredDocuments)
+// })
+
+// app.get('/documents/:id', (req, res) => {
+//   const id = parseInt(req.params.id, 10)
+//   const documents = JSON.parse(fs.readFileSync('documents.json'))
+//   const document = documents.find((doc) => doc.id === id)
+
+//   if (document) {
+//     res.json(document)
+//   } else {
+//     res.status(404).send('Not Found')
+//   }
+// })
+
+// app.post('/search', (req, res) => {
+//   const q = req.query.q
+//   const fields = req.body.fields
+//   const documents = JSON.parse(fs.readFileSync('documents.json'))
+
+//   if (q && fields) {
+//     res.status(400).send('Both query parameter and fields cannot be provided.')
+//     return
+//   }
+//   const filteredDocuments = q
+//     ? documents.filter((doc) =>
+//         Object.values(doc).some((value) => value.toString().includes(q))
+//       )
+//     : fields
+//     ? documents.filter((doc) =>
+//         Object.entries(fields).some(([key, value]) => doc[key] === value)
+//       )
+//     : documents
+
+//   res.json(filteredDocuments)
+// })
+
+// app.listen(port, () => {
+//   console.log(`Listening on port ${port}`)
+// })
+
+//-- end
+
 if (process.env.API_PATH) {
   app.use(process.env.API_PATH, router)
 } else {
@@ -162,7 +166,3 @@ app.use('*', (req, res) => {
 })
 
 module.exports = app
-
-app.get('/my-route', (req, res) => {
-  res.send('Hi friend')
-})
