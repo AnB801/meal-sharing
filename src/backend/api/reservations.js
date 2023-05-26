@@ -1,11 +1,15 @@
 const express = require('express')
 const router = express.Router()
 const knex = require('../database')
+const reservationRouter = express.Router()
 
 // all
-router.get('/', async (req, res) => {
+reservationRouter.get('/', async (req, res) => {
   try {
     const reservations = await knex('Reservation').select('*')
+    if (!reservations.length) {
+      response.status(404).json({ error: 'That Reservation doesn’t exist.' })
+    }
     res.json(reservations)
   } catch (error) {
     res.status(500).json({ error: 'Error retrieving reservations' })
@@ -13,7 +17,7 @@ router.get('/', async (req, res) => {
 })
 
 // new
-router.post('/', async (req, res) => {
+reservationRouter.post('/', async (req, res) => {
   try {
     const newReservation = {
       ...req.body,
@@ -26,7 +30,7 @@ router.post('/', async (req, res) => {
 })
 
 // by id
-router.get('/:id', async (req, res) => {
+reservationRouter.get('/:id', async (req, res) => {
   try {
     const resId = parseInt(req.params.id)
     const reservations = await knex('Reservation')
@@ -39,5 +43,18 @@ router.get('/:id', async (req, res) => {
   }
 })
 
-// export default router
-module.exports = router
+// del by id
+reservationRouter.delete('/:id', async (req, res) => {
+  try {
+    const resId = parseInt(req.params.id)
+    const reservations = await knex('Reservation')
+      .select('*')
+      .where({ id: resId })
+      .first()
+    res.json(reservations)
+  } catch (error) {
+    res.status(500).send('Error retrieving reservations: ' + error.message)
+  }
+})
+
+module.exports = reservationRouter
