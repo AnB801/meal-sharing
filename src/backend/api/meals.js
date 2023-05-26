@@ -1,30 +1,38 @@
 const express = require('express')
 const router = express.Router()
 const knex = require('../database')
+const { reset } = require('nodemon')
+const mealRouter = express.Router()
 
 //all
-router.get('/', async (request, response) => {
+mealRouter.get('/', async (req, res) => {
   try {
-    // knex syntax for selecting things. Look up the documentation for knex for further info
-    const titles = await knex('Meals').select('title')
-    response.json(titles)
+    const allMeals = await knex('Meal').select('*')
+    if (!allMeals.length) {
+      response.status(404)
+    }
+    res.json(allMeals)
   } catch (error) {
     throw error
   }
 })
 
 // GET
-router.get('/api/meal', async (req, res) => {
+mealRouter.get('/:id', async (req, res) => {
   try {
-    const newMeals = await knex('Meal').select('*')
-    res.json(newMeals)
+    const id = parseInt(req.params.id)
+    const mealId = await knex('Meal').select('*').where({ id: id })
+    if (!mealId.length) {
+      response.status(404)
+    }
+    res.json(mealId)
   } catch (error) {
     res.status(500).send('Error: ' + error)
   }
 })
 
 //POST
-router.post('/api/meals', async (req, res) => {
+mealRouter.post('/', async (req, res) => {
   try {
     const newMeal = req.body
     await knex('Meal').insert(newMeal)
@@ -37,8 +45,8 @@ router.post('/api/meals', async (req, res) => {
 // GET by id
 router.get('/api/meals/:id', async (req, res) => {
   try {
-    const mealId = parseInt(req.params.id)
-    const meal = await knex('Meal').select('*').where({ id: mealId }).first()
+    const id = parseInt(req.params.id)
+    const meal = await knex('Meal').select('*').where({ id: id }).first()
 
     if (meal) {
       res.json(meal)
@@ -53,9 +61,9 @@ router.get('/api/meals/:id', async (req, res) => {
 // update by id
 router.put('/:id', async (req, res) => {
   try {
-    const mealId = parseInt(req.params.id)
+    const id = parseInt(req.params.id)
     const updatedMeal = req.body
-    await knex('Meal').where({ id: mealId }).update(updatedMeal)
+    await knex('Meal').where({ id: id }).update(updatedMeal)
     res.json({ message: 'Meal updated' })
   } catch (error) {
     res.status(500).send('Error: ' + error)
@@ -63,61 +71,14 @@ router.put('/:id', async (req, res) => {
 })
 
 // delete by id
-router.delete('/:id', async (req, res) => {
+mealRouter.delete('/:id', async (req, res) => {
   try {
-    const mealId = parseInt(req.params.id)
-    await knex('Meal').where({ id: mealId }).del()
-    res.json({ message: 'Meal deleted' })
+    const id = parseInt(req.params.id)
+    await knex('Meal').where({ id: id }).del()
+    res.status(200).json({ message: 'Meal deleted' })
   } catch (error) {
     res.status(500).send('Error: ' + error)
   }
-})
-
-router.get('/api/meals', async (req, res) => {
-  let meals = knex('meals').select('*')
-
-  if (req.query.maxPrice) {
-    meals.where('price', '<', req.query.maxPrice)
-  }
-
-  if (req.query.title) {
-    meals.where('title', 'like', `${req.query.title}`)
-  }
-
-  if (req.query.dateAfter) {
-    meals.where('when', '>', req.query.dateAfter)
-  }
-
-  if (req.query.dateBefore) {
-    meals.where('when', '<', req.query.dateBefore)
-  }
-
-  if (req.query.limit) {
-    meals.limit(req.query.limit)
-  }
-
-  if (req.query.sortKey) {
-    meals.orderBy(req.query.sortKey, req.query.sortDir || 'asc')
-  }
-
-  if (req.query.availableReservations) {
-    meals = meals
-      .leftJoin('reservations', 'meals.id', 'reservations.meal_id')
-      .select('meals.*')
-      .count({ reservations: 'reservations.id' })
-      .groupBy('meals.id')
-      .having(
-        knex.raw(
-          'max_reservations > coalesce(sum(reservations.number_of_guests), 0)'
-        ),
-        '=',
-        req.query.availableReservations === 'true'
-      )
-  }
-
-  meals = await meals
-
-  res.json(meals)
 })
 
 module.exports = router
