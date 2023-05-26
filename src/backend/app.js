@@ -3,7 +3,7 @@ const app = express()
 const router = express.Router()
 const path = require('path')
 const mealsRouter = require('./api/meals')
-const reservationsRouter = require('./api/reservations')
+const reservationRouter = require('./api/reservations')
 
 const buildPath = path.join(__dirname, '../../dist')
 const port = process.env.PORT || 3000
@@ -22,7 +22,7 @@ app.use(cors())
 
 //localhost:5000/api/meals
 router.use('/meals', mealsRouter)
-router.use('/Reservations', reservationsRouter)
+router.use('/Reservations', reservationRouter)
 // router.use('/Reviews', reviewsRouter)
 
 //--Homework week1--
