@@ -7,13 +7,95 @@ const mealRouter = express.Router()
 //all
 mealRouter.get('/', async (req, res) => {
   try {
-    const allMeals = await knex('Meal').select('*')
+    let query = knex('Meal').select('*')
+    const maxPrice = req.query.maxPrice
+    const title = req.query.title
+    const dateAfter = req.query.dateAfter
+    const dateBefore = req.query.dateBefore
+    const limit = req.query.limit
+    const sortKey = req.query.sortKey
+    const sortDir = req.query.sortDir
+
+    // Check for max Price
+    if (maxPrice) {
+      if (!isNaN(parseInt(maxPrice))) {
+        query = query.where('price', '<=', maxPrice)
+      } else {
+        return res
+          .status(400)
+          .json({ error: 'Invalid maxPrice query parameter, enter a number' })
+      }
+    }
+
+    // Check for dateAfter
+    if (dateAfter) {
+      if (!isNaN(Date.parse(dateAfter))) {
+        query = query.where('created_date', '>', dateAfter)
+      } else {
+        return res.status(400).json({
+          error: 'Invalid dateAfter query parameter, enter a valid date',
+        })
+      }
+    }
+
+    // Check for dateBefore
+    if (dateBefore) {
+      if (!isNaN(Date.parse(dateBefore))) {
+        query = query.where('created_date', '<', dateBefore)
+      } else {
+        return res.status(400).json({
+          error: 'Invalid dateBefore query parameter, enter a valid date',
+        })
+      }
+    }
+
+    // Check for limit
+    if (limit) {
+      if (!isNaN(parseInt(limit))) {
+        query = query.limit(limit)
+      } else {
+        return res
+          .status(400)
+          .json({ error: 'Invalid limit query parameter, enter a number' })
+      }
+    }
+
+    // sort keys
+    const validSortKeys = ['when', 'max_reservations', 'price']
+    const validSortDirs = ['asc', 'desc']
+
+    if (sortKey) {
+      if (validSortKeys.includes(sortKey)) {
+        if (sortDir && validSortDirs.includes(sortDir)) {
+          query = query.orderBy(sortKey, sortDir)
+        } else {
+          query = query.orderBy(sortKey, 'asc')
+        }
+      } else {
+        return res.status(400).json({
+          error:
+            'Invalid sortKey query parameter, use one of the following: when, max_reservations, price',
+        })
+      }
+    }
+
+    let allMeals = await query
+
+    // Check for title query
+    if (title) {
+      allMeals = allMeals.filter((meal) =>
+        meal.title.toLowerCase().includes(title.toLowerCase())
+      )
+    }
+
     if (!allMeals.length) {
-      response.status(404)
+      console.log(req.body)
+      return res.status(404).send('No meals found')
     }
     res.json(allMeals)
   } catch (error) {
-    throw error
+    console.log(error)
+    res.status(500).json({ error: 'Server error' })
   }
 })
 
@@ -82,3 +164,4 @@ mealRouter.delete('/:id', async (req, res) => {
 })
 
 module.exports = router
+module.exports = mealRouter
