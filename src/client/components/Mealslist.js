@@ -1,27 +1,25 @@
-import { useState } from 'react'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react'
+import './MealsList.css'
+import { Link } from 'react-router-dom'
+// import axios from 'axios'
 
 const MealsList = () => {
   const [meals, setMeals] = useState([])
 
   useEffect(() => {
-    const fetchMeals = async () => {
-      const result = await axios('/api/meals')
-      setMeals(result.data)
-    }
-
-    fetchMeals()
+    fetch('/api/meals')
+      .then((response) => response.json())
+      .then((data) => setMeals(data))
+      .catch((error) => console.log('Error:', error))
   }, [])
 
   return (
-    <div>
-      {meals.map((meal) => (
-        <div key={meal.id}>
-          <h2>{meal.title}</h2>
-          <p>{meal.description}</p>
-          <p>Price: ${meal.price}</p>
-        </div>
-      ))}
+    <div className="main-div">
+      <div>
+        {meals.map((meal) => (
+          <Meal key={meal.id} meal={meal} />
+        ))}
+      </div>
     </div>
   )
 }

@@ -5,23 +5,10 @@ import MealsList from './components/Mealslist'
 
 function App() {
   return (
-    <Router>
-      <Route exact path="/">
-        <p>test</p>
-      </Route>
-      <Route exact path="/lol">
-        <h1>lololo</h1>
-      </Route>
-      <Route exact path="/test-component">
-        <TestComponent></TestComponent>
-      </Route>
-      <Route exact path="/meal-list">
-        <div>
-          <h1>Meal Sharing</h1>
-          <MealsList />
-        </div>
-      </Route>
-    </Router>
+    <div>
+      <h1>Meal Sharing App</h1>
+      <MealsList />
+    </div>
   )
 }
 
