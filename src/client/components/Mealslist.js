@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import './MealsList.css'
 import { Link } from 'react-router-dom'
 // import axios from 'axios'
+import ReservationForm from './reservationForm'
+import Reviews from './Reviews'
 
 const MealsList = () => {
   const [meals, setMeals] = useState([])
@@ -40,6 +42,8 @@ const MealsList = () => {
           <h2>{meal.title}</h2>
           <p>{meal.description}</p>
           <p>{meal.price}</p>
+          <ReservationForm mealId={meal.id} />
+          <Reviews reviews={meal.reviews} />
         </div>
       ))}
     </div>

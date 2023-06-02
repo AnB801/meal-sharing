@@ -30,21 +30,6 @@ router.use('/Reservations', reservationRouter)
 // like Ahmed say ))
 const knex = require('./database')
 
-//This query gives me additional fields in the data array that I don't really understand
-// app.get('/all-meals', (req, res) => {
-//   knex
-//     .raw('SELECT * FROM Meal ')
-//     .then((rows) => {
-//       const jsonResponce = JSON.stringify(rows)
-//       res.send(jsonResponce)
-//     })
-//     .catch((error) => {
-//       console.error(error)
-//     })
-// })
-
-// This query works correctly.Rewrite all queries according to this
-
 app.get('/all-meals', async (req, res) => {
   try {
     const allMeals = await knex('Meal').orderBy('id', 'desc')
@@ -105,70 +90,6 @@ app.get('/last-meal', async (req, res) => {
     throw error
   }
 })
-
-//-- end
-
-//--Homework week2--
-// app.use('/api/meals', mealsRouter)
-// app.use('/api/reservations', reservationsRouter)
-
-//app.use(express.json())
-
-// app.get('/', (req, res) => {
-//   res.send('This is a search engine')
-// })
-
-// app.get('/search', (req, res) => {
-//   const q = req.query.q
-//   const documents = JSON.parse(fs.readFileSync('documents.json'))
-//   const filteredDocuments = q
-//     ? documents.filter((doc) =>
-//         Object.values(doc).some((value) => value.toString().includes(q))
-//       )
-//     : documents
-
-//   res.json(filteredDocuments)
-// })
-
-// app.get('/documents/:id', (req, res) => {
-//   const id = parseInt(req.params.id, 10)
-//   const documents = JSON.parse(fs.readFileSync('documents.json'))
-//   const document = documents.find((doc) => doc.id === id)
-
-//   if (document) {
-//     res.json(document)
-//   } else {
-//     res.status(404).send('Not Found')
-//   }
-// })
-
-// app.post('/search', (req, res) => {
-//   const q = req.query.q
-//   const fields = req.body.fields
-//   const documents = JSON.parse(fs.readFileSync('documents.json'))
-
-//   if (q && fields) {
-//     res.status(400).send('Both query parameter and fields cannot be provided.')
-//     return
-//   }
-//   const filteredDocuments = q
-//     ? documents.filter((doc) =>
-//         Object.values(doc).some((value) => value.toString().includes(q))
-//       )
-//     : fields
-//     ? documents.filter((doc) =>
-//         Object.entries(fields).some(([key, value]) => doc[key] === value)
-//       )
-//     : documents
-
-//   res.json(filteredDocuments)
-// })
-
-// app.listen(port, () => {
-//   console.log(`Listening on port ${port}`)
-// })
-
-//-- end
 
 if (process.env.API_PATH) {
   app.use(process.env.API_PATH, router)

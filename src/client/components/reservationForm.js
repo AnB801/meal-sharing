@@ -1,61 +1,61 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react'
+import axios from 'axios'
 
-const ReservationForm = ({ mealId }) => {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [guests, setGuests] = useState('');
+function ReservationForm({ mealId }) {
+  const [contact_name, setName] = useState('')
+  const [contact_phonenumber, setPhone] = useState('')
+  const [number_of_guests, setGuests] = useState('')
 
   const submitReservation = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
 
     try {
       const response = await axios.post('/api/reservations', {
         meal_id: mealId,
-        name,
-        phone,
-        number_of_guests: guests,
-      });
+        contact_name: contact_name,
+        contact_phonenumber: contact_phonenumber,
+        number_of_guests: number_of_guests,
+      })
 
       if (response.status === 200) {
-        alert('Reservation successfully created!');
+        alert('Reservation successfully created!')
       } else {
-        alert('There was a problem creating your reservation.');
+        alert('There was a problem creating your reservation.')
       }
     } catch (error) {
-      console.error(error);
-      alert('There was an error creating your reservation.');
+      console.error(error)
+      alert('There was an error creating your reservation.')
     }
 
     // Clear the form
-    setName('');
-    setPhone('');
-    setGuests('');
-  };
+    setName('')
+    setPhone('')
+    setGuests('')
+  }
 
   return (
     <form onSubmit={submitReservation}>
       <input
         type="text"
         placeholder="Your Name"
-        value={name}
+        value={contact_name}
         onChange={(e) => setName(e.target.value)}
       />
       <input
         type="tel"
         placeholder="Your Phone Number"
-        value={phone}
+        value={contact_phonenumber}
         onChange={(e) => setPhone(e.target.value)}
       />
       <input
         type="number"
         placeholder="Number of Guests"
-        value={guests}
+        value={number_of_guests}
         onChange={(e) => setGuests(e.target.value)}
       />
       <button type="submit">Make a Reservation</button>
     </form>
-  );
-};
+  )
+}
 
-export default ReservationForm;
+export default ReservationForm

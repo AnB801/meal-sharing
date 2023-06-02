@@ -1,8 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const knex = require('../database')
-const reservationRouter = express.Router()
-
+const reservationRouter = router
 // all
 
 reservationRouter.get('/', async (req, res) => {
@@ -74,7 +73,7 @@ reservationRouter.delete('/:id', async (req, res) => {
     const reservations = await knex('Reservation')
       .select('*')
       .where({ id: resId })
-      .first()
+      .del()
     res.json(reservations)
   } catch (error) {
     res.status(500).send('Error retrieving reservations: ' + error.message)
